@@ -1,10 +1,10 @@
 #  System Call Tracing Project (Linux - Ubuntu 22.04)
 
 ##  Giới thiệu
-Project này giúp tìm hiểu **system call** trong Linux bằng cách:
-- Viết một chương trình C đơn giản (`simple_target.c`) có sử dụng `printf` và `write`.
-- Dùng `strace` để theo dõi các system call được gọi.
-- Lọc riêng một số system call (ví dụ: `write`) và lưu kết quả ra file log.
+Project này giúp tìm hiểu cho phép hoặc chặn **system call** trong Linux bằng cách:
+- Viết một chương trình C đơn giản (`suspected.c`) có sử dụng `fork`,`open` và 'wirte.
+- Dùng seccomp để theo dõi các system call được gọi.
+- Sử dụng filter để lọc các chương trình con thuộc danh sách cho phép hay từ chối chạy.
 - Hiểu được mối liên hệ giữa code trong C và lời gọi system call trong nhân (kernel).
 
 ## 🛠 Chuẩn bị
@@ -22,29 +22,23 @@ Project này giúp tìm hiểu **system call** trong Linux bằng cách:
     git clone 
 2. Biên dịch chương trình:
     ```bash
-   make
-   sinh ra file thực thi `simple_target`.
+   make saferun.c
+   //sinh ra file thực thi `saferun`.
+   make suspected.c
+   //sinh ra file thực thi `suspected`.
 3. Chạy chương trình:
     ```bash
-   ./simple_target
-    //Kết quả: Hello from simple_target!
-            //Writing directly to stdout using write syscall.
-4. Trace toàn bộ system call:
-    ```bash
-    strace -o trace.log ./simple_target
-    cat trace.log
-    //Trong `trace.log` bạn sẽ thấy rất nhiều system call được gọi như `execve`, `brk`, `mmap`, `write`, `exit_group`...
-5. Trace riêng system call `write` và lưu vào `trace_write.log`:
-    ```bash
-    chmod +x trace_write.sh
-    ./trace_write.sh
-    cat trace_write.log
-    ## Phân tích kết quả
-    Trong `trace_write.log`, bạn sẽ thấy các dòng liên quan đến system call `write`, ví dụ:
-        (1, "Hello from simple_target!\n", 26) → danh sách tham số:
-        1 → file descriptor (FD):
-        0 = stdin
-        1 = stdout
-        2 = stderr
-        "Hello from simple_target!\n" → nội dung dữ liệu ghi ra 26 
-        → số byte cần ghi = 26 → giá trị trả về (số byte thực sự đã ghi).
+   ./run/saferun -e read,write -- ./run/suspected test_run_d
+    //Kết quả: [INFO] Saferun is starting
+            // [INFO] Đang chờ tiến trình con (PID: 143757) kết thúc...
+            // [INFO] Tien trinh con (PID: 143757) chuan bi ap dung bo loc.
+            // [INFO] Bắt đầu thiết lập Seccomp filter...
+            // [INFO] Chế độ: WHITELIST (Mặc định KILL, chỉ cho phép các syscall cụ thể)
+            // [INFO] Chế độ: WHITELIST (Mặc định KILL, chỉ cho phép các syscall cụ thể)
+            // [ALLOW]Các syscall hệ thống cơ bản đã được cho phép.
+            // [ALLOW] Đã cho phép system call: read
+            // [ALLOW] Đã cho phép system call: write
+            // [SUCCESS] Thiet lap Seccomp hoan tat. Bo loc da duoc ap dung
+            // [INFO] Thuc thi chuong trinh dich: ./run/suspected
+            // [WARN] Tiến trình con bị kết thúc bởi tín hiệu: 31 (Bad system call)
+            // [WARN] RẤT CÓ THỂ TIẾN TRÌNH ĐÃ BỊ CHẶN BỞI SECCOMP (SIGSYS)
