@@ -3,16 +3,22 @@
 ##  Giới thiệu
 Project này giúp tìm hiểu cho phép hoặc chặn **system call** trong Linux bằng cách:
 - Viết một chương trình C đơn giản (`suspected.c`) có sử dụng `fork`,`open` và 'wirte.
-- Dùng seccomp để theo dõi các system call được gọi.
-- Sử dụng filter để lọc các chương trình con thuộc danh sách cho phép hay từ chối chạy.
+- Seccomp cho phép lọc system call ở mức kernel.
 - Hiểu được mối liên hệ giữa code trong C và lời gọi system call trong nhân (kernel).
+## Yêu cầu:
+- Thực thi một chương trình con (suspected) với các tham số chỉ định.
+- Giới hạn một số system call nhất định (ví dụ: open, fork, socket, kill, shutdown, …).
+- Cho phép chỉ chạy các system call an toàn, hoặc chặn những system call nguy hiểm.
+- VD: Chạy chương trình suspected với các đối số a b c, nhưng không cho phép system call open và fork.
+- "saferun -d:open,fork suspected -- a b c"
 
 ## 🛠 Chuẩn bị
 - Ubuntu 22.04 (hoặc tương tự)
 - Công cụ cần thiết:
   ```bash
   sudo apt update
-  sudo apt install build-essential strace -y
+  sudo apt install libseccomp-dev
+
 
 ## Hướng dẫn chạy
 1. Clone project về máy:
