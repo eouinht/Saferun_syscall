@@ -1,0 +1,9 @@
+# .gitignore
+# File thực thi và file đối tượng
+*.o
+*.exe
+saferun
+suspected
+output.txt
+# File cấu hình của make
+Makefile
